@@ -2,6 +2,7 @@
 .DS_Store
 .buildpath
 .versions
+.npmrc
 node_modules
 npm-debug.log
 build

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2022, The Cytoscape Consortium.
+ * Copyright (c) 2016-2023, The Cytoscape Consortium.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the “Software”), to deal in
@@ -16196,7 +16196,7 @@ var styfn$2 = {};
       enums: ['none', 'wrap', 'ellipsis']
     },
     textOverflowWrap: {
-      enums: ['whitespace', 'anywhere']
+      enums: ['whitespace', 'anywhere', 'mixed']
     },
     textBackgroundShape: {
       enums: ['rectangle', 'roundrectangle', 'round-rectangle']
@@ -23756,9 +23756,11 @@ BRp$9.getLabelText = function (ele, prefix) {
     var maxW = ele.pstyle('text-max-width').pfValue;
     var overflow = ele.pstyle('text-overflow-wrap').value;
     var overflowAny = overflow === 'anywhere';
+    var overflowMixed = overflow === 'mixed';
     var wrappedLines = [];
     var wordsRegex = /[\s\u200b]+/;
     var wordSeparator = overflowAny ? '' : ' ';
+    var japaneseRegex = /[\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]/;
 
     for (var l = 0; l < lines.length; l++) {
       var line = lines[l];
@@ -23772,25 +23774,47 @@ BRp$9.getLabelText = function (ele, prefix) {
 
       if (lineW > maxW) {
         // line is too long
+        if (overflowMixed) {
+          var _words = line.split(wordsRegex);
+
+          for (var w = 0; w < _words.length; w++) {
+            var word = _words[w];
+
+            if (japaneseRegex.test(word)) {
+              var processedWord = word.split('').join(zwsp);
+              _words[w] = processedWord;
+            }
+          }
+
+          line = _words.join(zwsp);
+        }
+
         var words = line.split(wordsRegex);
         var subline = '';
 
-        for (var w = 0; w < words.length; w++) {
-          var word = words[w];
-          var testLine = subline.length === 0 ? word : subline + wordSeparator + word;
+        for (var _w = 0; _w < words.length; _w++) {
+          var _word = words[_w];
+
+          if (overflowMixed && (japaneseRegex.test(_word) || _word.length === 1)) {
+            wordSeparator = '';
+          } else {
+            wordSeparator = overflowAny ? '' : ' ';
+          }
+
+          var testLine = subline.length === 0 ? _word : subline + wordSeparator + _word;
           var testDims = this.calculateLabelDimensions(ele, testLine);
           var testW = testDims.width;
 
           if (testW <= maxW) {
             // word fits on current line
-            subline += word + wordSeparator;
+            subline += _word + wordSeparator;
           } else {
             // word starts new line
             if (subline) {
               wrappedLines.push(subline);
             }
 
-            subline = word + wordSeparator;
+            subline = _word + wordSeparator;
           }
         } // if there's remaining text, put it in a wrapped line
 
@@ -31913,7 +31937,7 @@ sheetfn.appendToStyle = function (style) {
   return style;
 };
 
-var version = "3.23.0";
+var version = "snapshot";
 
 var cytoscape = function cytoscape(options) {
   // if no options specified, use default
