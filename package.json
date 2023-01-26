@@ -1,5 +1,5 @@
 {
-  "name": "cytoscape",
+  "name": "@basaldev/cytoscape",
   "version": "3.23.0",
   "license": "MIT",
   "description": "Graph theory (a.k.a. network) library for analysis and visualisation",
