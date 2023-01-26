@@ -361,9 +361,12 @@ BRp.getLabelText = function( ele, prefix ){
     let maxW = ele.pstyle('text-max-width').pfValue;
     let overflow = ele.pstyle('text-overflow-wrap').value;
     let overflowAny = overflow === 'anywhere';
+    let overflowMixed = overflow === 'mixed';
     let wrappedLines = [];
     let wordsRegex = /[\s\u200b]+/;
     let wordSeparator = overflowAny ? '' : ' ';
+    let japaneseRegex =
+      /[\u3000-\u303f]|[\u3040-\u309f]|[\u30a0-\u30ff]|[\uff00-\uff9f]|[\u4e00-\u9faf]|[\u3400-\u4dbf]/;
 
     for( let l = 0; l < lines.length; l++ ){
       let line = lines[ l ];
@@ -378,11 +381,33 @@ BRp.getLabelText = function( ele, prefix ){
       }
 
       if( lineW > maxW ){ // line is too long
+        
+        if (overflowMixed) {
+          let words = line.split(wordsRegex);
+          for (let w = 0; w < words.length; w++) {
+            let word = words[w];
+
+            if (japaneseRegex.test(word)) {
+              const processedWord = word.split('').join(zwsp);
+              words[w] = processedWord;
+            }
+          }
+
+          line = words.join(zwsp);
+        }
+
         let words = line.split(wordsRegex);
         let subline = '';
 
         for( let w = 0; w < words.length; w++ ){
           let word = words[ w ];
+
+          if (overflowMixed && (japaneseRegex.test(word) || word.length === 1)) {
+            wordSeparator = '';
+          } else {
+            wordSeparator = overflowAny ? '' : ' ';
+          }
+
           let testLine = subline.length === 0 ? word : subline + wordSeparator + word;
           let testDims = this.calculateLabelDimensions( ele, testLine );
           let testW = testDims.width;

@@ -64,7 +64,7 @@ const styfn = {};
     textDecoration: { enums: [ 'none', 'underline', 'overline', 'line-through' ] },
     textTransform: { enums: [ 'none', 'uppercase', 'lowercase' ] },
     textWrap: { enums: [ 'none', 'wrap', 'ellipsis' ] },
-    textOverflowWrap: { enums: [ 'whitespace', 'anywhere' ] },
+    textOverflowWrap: { enums: [ 'whitespace', 'anywhere', 'mixed' ] },
     textBackgroundShape: { enums: [ 'rectangle', 'roundrectangle', 'round-rectangle' ]},
     nodeShape: { enums: [
       'rectangle', 'roundrectangle', 'round-rectangle', 'cutrectangle', 'cut-rectangle', 'bottomroundrectangle', 'bottom-round-rectangle', 'barrel',
